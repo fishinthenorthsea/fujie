@@ -40,51 +40,11 @@ void handle_expired_event()
     pthread_mutex_unlock(&qlock);
 }
 
-/*
-void handle_for_sigpipe()
-{
-    struct sigaction sa;
-    memset(&sa, '\0', sizeof(sa));
-    sa.sa_handler = SIG_IGN;
-    sa.sa_flags = 0;
-    if(sigaction(SIGPIPE, &sa, NULL))
-        return;
-}*/
-
-
-
 void myHandler(void *args)
 {
 	requestData *req_data = (requestData*)args;
 	req_data->handleRequest();
 }
-
-
-/*
-void handle_expired_event()
-{
-    pthread_mutex_lock(&qlock);
-    while (!myTimerQueue.empty())
-    {
-        mytimer *ptimer_now = myTimerQueue.top();
-        if (ptimer_now->isDeleted())
-        {
-            myTimerQueue.pop();
-            delete ptimer_now;
-        }
-        else if (ptimer_now->isvalid() == false)
-        {
-            myTimerQueue.pop();
-            delete ptimer_now;
-        }
-        else
-        {
-            break;
-        }
-    }
-    pthread_mutex_unlock(&qlock);
-}
-*/
 
 
 void acceptConnection(int listen_fd, int epoll_fd,string path)
@@ -241,6 +201,7 @@ int main(int argc, char *argv[])
 
 
     __uint32_t event = EPOLLIN | EPOLLET;
+
     requestData *req = new requestData();
     req->setFd(listenfd);
     epoll_add(epollfd, listenfd, static_cast<void*>(req), event);
@@ -249,7 +210,7 @@ int main(int argc, char *argv[])
 
 	while (true)
 	{
-		printf("\n\n\n\nwait!!!!!!!!\n");
+	//	printf("\n\n\n\nwait!!!!!!!!\n");
 
 		int events_num = epoll_wait(epollfd, events, MAXEVENTS, -1);
 
@@ -263,7 +224,6 @@ int main(int argc, char *argv[])
             continue;
 		
 
-
 		for (int i = 0; i < events_num; i++)
 		{
 			// 获取有事件产生的描述符
@@ -271,12 +231,12 @@ int main(int argc, char *argv[])
 
 			int fd = request->getFd();
 
-			printf("fd=%d\n",request->getFd());
+			//printf("fd=%d\n",request->getFd());
 
 			// 有事件发生的描述符为监听描述符
 			if (fd == listenfd)
 			{
-				cout << "This is listen_fd" << endl;
+				//cout << "This is listen_fd" << endl;
 				acceptConnection(listenfd, epollfd, PATH);
 			}
 			else
@@ -290,17 +250,15 @@ int main(int argc, char *argv[])
 					continue;
 				}
 
-				printf("chuli!!!!!!!!!!!!!!!!!!\n");
 			 
-
 				// 将请求任务加入到线程池中
 				// 加入线程池之前将Timer和request分离
 
-		    	request->seperateTimer();
+		    	request->seperateTimer();  //request , timer  分离
+
 				int ret=threadpool_add(tp, myHandler, events[i].data.ptr);
 			}
 		}
-
 		handle_expired_event();
 	}
 

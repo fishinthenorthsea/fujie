@@ -229,8 +229,8 @@ void *adjust_thread(void *threadpool) {
 
 int threadpool_add(threadpool_t *pool, void (*function)(void *), void *arg)
 {
+	
 	int err = 0;
-
 	if (pool == NULL || function == NULL)
 	{
 		return -1;
@@ -295,7 +295,6 @@ int threadpool_add(threadpool_t *pool, void (*function)(void *), void *arg)
 	if (pthread_mutex_unlock(&pool->lock) != 0) {
 		err = -2;
 	}
-	printf("加入线程池成功\n");
 	return err;	
 }
 
@@ -375,7 +374,7 @@ threadpool_t * pthreadpool_create(int min_thr_num, int  max_thr_num, int queue_m
 		}
 		
 		printf("开启管理者线程\n");
-		pthread_create(&(pool->adjust_tid), NULL, adjust_thread, (void*)pool);
+		//pthread_create(&(pool->adjust_tid), NULL, adjust_thread, (void*)pool);
 
 		return pool;
 
