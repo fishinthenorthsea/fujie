@@ -9,8 +9,6 @@ int epoll_init()
     int epoll_fd = epoll_create(LISTENQ + 1);
     if(epoll_fd == -1)
         return -1;
-    //events = (struct epoll_event*)malloc(sizeof(struct epoll_event) * MAXEVENTS);
-    events = new epoll_event[MAXEVENTS];
     return epoll_fd;
 }
 

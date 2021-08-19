@@ -345,28 +345,7 @@ void requestData::handleRequest()
 			}
 
 
-		
-		}
 
-		if(2==state){  //GET
-			int j;
-			int judge=0;
-			for(j=4;;j++){
-				if(line[j]=='?') judge=1;
-				if(line[j]==' ') break;
-				path[j-4]=line[j];
-			}
-			path[j-4]='\0';
-			//printf("\npath=%s\n",path);
-
-			if(judge==1)
-				state=4;
-			else
-				state=5;
-
-		}
-		if(3==state){   //POST
-			cout<<"it is post!!!!!!"<<endl;
 
 			while (tem < len)
 			{
@@ -438,10 +417,108 @@ void requestData::handleRequest()
 					keep_alive = true;
 				}
 			}
-			if()
 
-			cout<<"post is jieshu!!"<<endl;
-			state=5;
+
+		
+		}
+
+		if(2==state){  //GET
+			int j;
+			int judge=0;
+			for(j=4;;j++){
+				if(line[j]=='?') judge=1;
+				if(line[j]==' ') break;
+				path[j-4]=line[j];
+			}
+			path[j-4]='\0';
+			//printf("\npath=%s\n",path);
+
+			if(judge==1)
+				state=4;
+			else
+				state=5;
+
+		}
+		if(3==state){   //POST
+			cout << "it is post!!!!!!" << endl;
+			int j=5;
+
+			int judge = 0;
+
+			for (j = 5;j<len; j++) {
+				if (line[j] == ' ') break;
+				path[j - 5] = line[j];
+			}
+	
+			path[j - 5] = '\0';
+			 printf("\npath=%s\n",path);
+
+			j = 0;
+			char post[1024];
+				
+			while (tem < len)
+			{
+				if (line[tem] != ' '&&line[tem] != '\r'&&line[tem] != '\n') {
+					break;
+				}
+				tem++;
+			}
+			
+			char id[1024];
+			int i_id = 0;
+
+			char passwd[1024];
+			int i_passwd = 0;
+			judge = 0;
+
+			for (j = tem; j < len; j++) {
+				
+				if (judge == 0) {
+					if (line[j] == '=') { judge = 1; continue; }
+				}
+				if (judge == 1) {
+		
+					if (line[j] == '&') { id[i_id] = '\0'; judge = 2; continue; }
+				
+					id[i_id++] = line[j];
+				}
+				if (judge == 2) {
+					if (line[j] == '=') { judge = 3; continue; }
+				}
+				if (judge == 3) {
+					passwd[i_passwd++] = line[j];
+				}
+			}
+			//cout<<judge<<endl;
+
+			if (judge != 3) {
+				state = -1;
+				break;
+			}
+			passwd[i_passwd] = '\0';
+
+			printf("%s-------%s-------\n",id,passwd);
+
+			cout<<"?????";
+			
+			MYSQL *mysql = NULL;
+			
+			connectionRAII mysqlcon(&mysql, m_connPool);
+			
+			char sql[1024] = { 0 };
+			sprintf(sql, "SELECT * FROM people where id='%s' and passwd='%s'", id, passwd);
+
+			if (mysql_query(mysql, sql))
+				//if (mysql_query(mysql, "SELECT * FROM people"))
+			{
+				printf("mysql_restore_result(): %s\n", mysql_error(mysql));
+			}
+			//从表中检索完整的结果集
+			MYSQL_RES *result = mysql_store_result(mysql);
+			if (!mysql_fetch_row(result)) {
+				strcpy(path, "/error.html");
+			}
+			state = 5;
 
 		}
 		if(4==state){   //get ---- ?
@@ -453,6 +530,7 @@ void requestData::handleRequest()
 			int judge=0;
 			for(int j=0;;j++){
 				if(path[j]=='\0') break;
+				if(path[j]==' ') break;
 				if(path[j]=='?'){path[j]='\0' ;judge=1;continue;}
 				if(judge==1){
 					if(path[j]=='=') {judge=2;continue;}
@@ -469,6 +547,11 @@ void requestData::handleRequest()
 				}
 			}
 			passwd[i_passwd]='\0';
+
+			if(judge!=4){
+			    state=-1;
+			    break;
+			}
 
 		//	printf("%s-------%s\n",id,passwd);
 
@@ -539,11 +622,15 @@ void requestData::handleRequest()
 	} while (false);
 
 
+
 	
+
 	if(-1==state||keep_alive==false){
 		delete this;
 		return;
 	}
+
+	cout<<"chang";
 
 
 

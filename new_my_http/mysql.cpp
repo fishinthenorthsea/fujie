@@ -126,8 +126,8 @@ connection_pool::~connection_pool()
 }
 
 connectionRAII::connectionRAII(MYSQL **SQL, connection_pool *connPool){
+
 	*SQL = connPool->GetConnection();
-	
 	conRAII = *SQL;
 	poolRAII = connPool;
 }
@@ -135,3 +135,5 @@ connectionRAII::connectionRAII(MYSQL **SQL, connection_pool *connPool){
 connectionRAII::~connectionRAII(){
 	poolRAII->ReleaseConnection(conRAII);
 }
+
+

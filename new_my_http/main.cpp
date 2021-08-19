@@ -204,8 +204,10 @@ int main(int argc, char *argv[])
 
 	threadpool_t *tp = pthreadpool_create(4, 100, 65535);
 
-	struct epoll_event* events;
-	events = new epoll_event[MAXEVENTS];
+	//struct epoll_event* events;
+	//events = new epoll_event[MAXEVENTS];
+	struct epoll_event events[MAXEVENTS];
+
 
 
     __uint32_t event = EPOLLIN | EPOLLET;
@@ -239,6 +241,8 @@ int main(int argc, char *argv[])
 			requestData* request = (requestData*)(events[i].data.ptr);
 
 			int fd = request->getFd();
+
+		//	cout<<"fd is "<<fd<<endl;
 
 			// 有事件发生的描述符为监听描述符
 			if (fd == listenfd)
